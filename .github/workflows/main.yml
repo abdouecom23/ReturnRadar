@@ -1,0 +1,47 @@
+name: ReturnRadar Monorepo App Deploy (Build APK)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. سحب كود المشروع
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. إعداد بيئة Java JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      # 3. تحديث الـ Gradle Wrapper تلقائياً إلى الإصدار المطلق المطلِوب (9.3.1)
+      - name: Upgrade Gradle Version to 9.3.1
+        run: |
+          chmod +x gradlew
+          ./gradlew wrapper --gradle-version 9.3.1
+
+      # 4. إعطاء صلاحيات التشغيل للملف المحدث
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 5. بناء نسخة الـ APK للموديول الرئيسي
+      - name: Build APK with Gradle
+        run: ./gradlew :app:assembleRelease
+
+      # 6. استخراج الـ APK ورفعه للتحميل
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReturnRadar-Monorepo-APK
+          path: "**/build/outputs/apk/release/*-release.apk"
+          if-no-files-found: error
+          
