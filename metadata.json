@@ -1,0 +1,6 @@
+{
+  "name": "ReturnRadar",
+  "description": "AI-driven return audit tool that categorizes return notes, calculates capital bled, and highlights high-bleeding SKUs.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
