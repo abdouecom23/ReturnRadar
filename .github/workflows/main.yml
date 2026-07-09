@@ -1,0 +1,45 @@
+name: ReturnRadar Monorepo App Deploy (Build APK)
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. سحب كود المشروع
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      # 2. إعداد بيئة Java JDK 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      # 3. خطوة الإنقاذ: إعادة توليد الـ Gradle Wrapper السليم وتخطي الملف التالف
+      - name: Regenerate Clean Gradle Wrapper
+        run: jar cfe gradle/wrapper/gradle-wrapper.jar Miller "" || gradle wrapper --gradle-version 8.5 || android/gradlew wrapper
+
+      # 4. إعطاء صلاحية التشغيل للملف الجديد
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 5. بناء نسخة الـ APK
+      - name: Build APK with Gradle
+        run: ./gradlew :app:assembleRelease
+
+      # 6. استخراج الـ APK ورفعه للتحميل
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReturnRadar-Monorepo-APK
+          path: "**/build/outputs/apk/release/*-release.apk"
+          if-no-files-found: error
+          
