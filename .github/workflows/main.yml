@@ -1,0 +1,22 @@
+      # 3. البحث عن ملف gradlew وإعطائه صلاحية التشغيل تلقائياً أينما كان
+      - name: Grant execute permission for gradlew
+        run: find . -name "gradlew" -exec chmod +x {} +
+
+      # 4. البحث عن المجلد المحتوي على gradlew وبناء الـ APK من داخله تلقائياً
+      - name: Build APK
+        run: |
+          GRADLE_PATH=$(find . -name "gradlew" -print -quit)
+          if [ -z "$GRADLE_PATH" ]; then
+            echo "Error: gradlew file not found anywhere in the repository!"
+            exit 1
+          fi
+          cd $(dirname "$GRADLE_PATH")
+          ./gradlew assembleRelease
+
+      # 5. استخراج ملف الـ APK ورفعه (البحث عنه ديناميكياً لتجنب أخطاء المسارات)
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReturnRadar-SaaS-App
+          path: "**/build/outputs/apk/release/*-release.apk"
+          
